@@ -3,6 +3,8 @@
 import requests
 from django.conf import settings
 from django.contrib.auth import authenticate, login
+from requests import request
+
 from .forms import UserRegistrationForm, LoginForm
 from django.contrib import messages
 from django.shortcuts import render, redirect
@@ -67,3 +69,10 @@ class Validate2FAView(View):
 class HomeView(View):
     def get(self, request):
         return render(request, 'home.html')
+
+
+class auth_views(View):
+    def get(self, request):
+        return render(request, 'login.html')
+
+
