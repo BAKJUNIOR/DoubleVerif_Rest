@@ -1,0 +1,28 @@
+{% extends 'partials/header.html' %}
+{% load static %}
+{% block content %}
+
+<body>
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="card" style="width: 25rem;">
+            <div class="card-body">
+                <h2 class="card-title text-center">Pour accédez à votre compte</h2>
+                <p class="card-text text-center">Veuillez saisir le code que vous avez reçu par email.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="code" name="code" required placeholder="code validation">
+                    </div>
+                    <button type="submit" class="btn btn-primary " style="width: 100%">Valider</button>
+                </form>
+                {% if error %}
+                    <div class="alert alert-danger mt-3" role="alert">
+                        {{ error }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</body>
+{% endblock %}
