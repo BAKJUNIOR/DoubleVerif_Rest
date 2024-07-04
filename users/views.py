@@ -1,10 +1,6 @@
-# users/views.py
-
 import requests
 from django.conf import settings
-from django.contrib.auth import authenticate, login
-from requests import request
-
+from django.contrib.auth import authenticate, login, logout
 from .forms import UserRegistrationForm, LoginForm
 from django.contrib import messages
 from django.shortcuts import render, redirect
@@ -45,9 +41,12 @@ class LoginView(View):
                     data={'contact': contact, 'method': method}
                 )
                 if response.status_code == 200:
+                    request.session['contact'] = contact  # Store the contact in session
                     return redirect('validate_2fa')
-                return render(request, 'login.html', {'form': form, 'error': 'Erreur lors de envoi du code '})
-            return render(request, 'login.html', {'form': form, 'error': 'les informations identification invalides'})
+                messages.error(request, 'Erreur lors de l\'envoi du code.')
+                return render(request, 'login.html', {'form': form})
+            messages.error(request, 'Les informations d\'identification sont invalides.')
+            return render(request, 'login.html', {'form': form})
         return render(request, 'login.html', {'form': form})
 
 
@@ -57,13 +56,15 @@ class Validate2FAView(View):
 
     def post(self, request):
         code = request.POST.get('code')
+        contact = request.session.get('contact')  # Retrieve the contact from session
         response = requests.post(
             f"{settings.TWO_FA_SERVICE_URL}/api/2fa/validateCode",
-            data={'code': code}
+            data={'contact': contact, 'code': code}
         )
         if response.json() is True:
             return redirect('home')
-        return render(request, 'validate_2fa.html', {'error': 'le Code est invalide'})
+        messages.error(request, 'Le code est invalide.')
+        return render(request, 'validate_2fa.html')
 
 
 class HomeView(View):
@@ -71,8 +72,8 @@ class HomeView(View):
         return render(request, 'home.html')
 
 
-class auth_views(View):
+class LogoutView(View):
     def get(self, request):
-        return render(request, 'login.html')
-
-
+        logout(request)
+        messages.success(request, 'Vous avez été déconnecté avec succès.')
+        return redirect('login')
